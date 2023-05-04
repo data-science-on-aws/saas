@@ -1,4 +1,4 @@
-# SageMaker multi-tenant Pipelines (SaaS) - XGBoost
+# SageMaker multi-tenant Pipelines (SaaS)
 
 There are three notebooks in this repository:
 
