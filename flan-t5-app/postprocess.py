@@ -98,7 +98,12 @@ def handle(inputs: Input):
     with open(f'{flan_model_dir}/model.py', 'w') as file:
         file.write(file_content)
 
-
+def write_req_file(flan_model_dir):
+    with open(f"{flan_model_dir}/requirements.txt", "w") as file:
+        file.write("bitsandbytes==0.38.1\n")
+        file.write("accelerate==0.18.0\n")
+        file.write("transformers==4.28.1\n")
+    
     
 if __name__ == "__main__":
     logger.info("Starting postprocessing.")
@@ -121,6 +126,7 @@ if __name__ == "__main__":
     
     write_serving_file(f'{repackaged_location}/code_flant5_accelerate',s3_url )
     write_model_file(f'{repackaged_location}/code_flant5_accelerate')
+    write_req_file(f'{repackaged_location}/code_flant5_accelerate')
     
     os.system(f'tar -czvf {repackaged_location}/model.tar.gz -C {repackaged_location} code_flant5_accelerate')
     
