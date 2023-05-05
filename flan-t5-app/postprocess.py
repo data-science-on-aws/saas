@@ -15,8 +15,8 @@ logger.addHandler(logging.StreamHandler())
 
 
 def write_serving_file(flan_model_dir, s3_url):
-    file_content = "engine=Python\noption.tensor_parallel_degree=4\noption.s3url=s3://sagemaker-us-east-1-171503325295/flan-checkpoints/tenant1/app1/"
-
+    file_content = "engine=Python\noption.tensor_parallel_degree=4\noption.s3url={{ s3url }}"
+    
     with open(f'{flan_model_dir}/serving.properties', 'w') as file:
         file.write(file_content)
 
@@ -24,7 +24,7 @@ def write_serving_file(flan_model_dir, s3_url):
     jinja_env = jinja2.Environment()
     template = jinja_env.from_string(Path(f"{flan_model_dir}/serving.properties").open().read())
     Path(f"{flan_model_dir}/serving.properties").open("w").write(template.render(s3url=s3_url))
-
+    
 def write_model_file(flan_model_dir):
     file_content = """
 from djl_python import Input, Output
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    s3_url = {args.checkpoint_s3_path}
+    s3_url = args.checkpoint_s3_path
 
     repackaged_location = "/opt/ml/processing/model/repackaged"
     
