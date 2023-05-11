@@ -12,10 +12,8 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
-
-
 def write_serving_file(flan_model_dir, s3_url):
-    file_content = "engine=Python\noption.tensor_parallel_degree=4\noption.s3url={{ s3url }}"
+    file_content = "engine=Python\noption.tensor_parallel_degree=2\noption.s3url={{ s3url }}"
     
     with open(f'{flan_model_dir}/serving.properties', 'w') as file:
         file.write(file_content)

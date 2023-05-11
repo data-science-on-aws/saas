@@ -54,6 +54,8 @@ from sagemaker.pytorch import PyTorch
 
 from sagemaker.workflow.steps import CacheConfig
 
+from sagemaker.workflow.functions import Join
+
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -215,9 +217,6 @@ def get_pipeline(
     tenant_tier = ParameterString(
         name="TenantTier", default_value=None,
     )
-    bucket_name = ParameterString(
-        name="BucketName", default_value=None,
-    )
     model_version = ParameterString(
         name="ModelVersion", default_value=None,
     )
@@ -292,11 +291,12 @@ def get_pipeline(
         estimator=estimator,
         inputs={
             "train": TrainingInput(
-                s3_data = train_data_path,              
+                s3_data = Join(on = '/', values = [f"s3://{default_bucket}/sample-data", tenant_id,  app_id,  train_data_path]),
+
                 content_type="text/csv",
             ),
             "validation": TrainingInput(
-                s3_data = val_data_path,
+                s3_data = Join(on = '/', values = [f"s3://{default_bucket}/sample-data", tenant_id,  app_id,  val_data_path]),
                 content_type="text/csv",
             ),
         },
@@ -317,7 +317,7 @@ def get_pipeline(
         
     step_args = sklearn_processor.run(
         code=os.path.join(BASE_DIR, "postprocess.py"),
-        arguments=["--bucket-name",bucket_name, "--tenant-id",tenant_id, "--tenant-tier", tenant_tier, "--region",region,"--model-version",model_version, "--app-id", app_id, "--checkpoint-s3-path", checkpoint_s3_path ],
+        arguments=["--bucket-name",default_bucket, "--tenant-id",tenant_id, "--tenant-tier", tenant_tier, "--region",region,"--model-version",model_version, "--app-id", app_id, "--checkpoint-s3-path", checkpoint_s3_path ],
     )
     
     step_post_process = ProcessingStep(
@@ -338,7 +338,6 @@ def get_pipeline(
             val_data_path,
             tenant_id,
             tenant_tier,
-            bucket_name,
             model_version,
             app_id,
             checkpoint_s3_path
